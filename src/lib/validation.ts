@@ -35,3 +35,20 @@ export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
 export const createCommentSchema = z.object({
   content: requiredString,
 });
+
+export const claimProfileSchema = z.object({
+  username: requiredString,
+  email: requiredString.email("Invalid email address").refine(
+    (email) => email.endsWith(".edu"),
+    "Email must be a valid .edu address"
+  ),
+});
+
+export type ClaimProfileValues = z.infer<typeof claimProfileSchema>;
+
+export const verifyEmailSchema = z.object({
+  token: requiredString,
+  password: requiredString.min(8, "Must be at least 8 characters"),
+});
+
+export type VerifyEmailValues = z.infer<typeof verifyEmailSchema>;

@@ -10,9 +10,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -33,6 +32,11 @@ model User {
   comments              Comment[]
   receivedNotifications Notification[] @relation("Recipient")
   issuedNotifications   Notification[] @relation("Issuer")
+
+  // Email verification and claiming fields
+  isClaimed             Boolean        @default(false)
+  isEmailVerified       Boolean        @default(false)
+  emailVerificationToken String?       @unique
 
   createdAt DateTime @default(now())
 
@@ -75,20 +79,15 @@ model Post {
 }
 
 model Media {
-  id     String    @id @default(cuid())
+  id     String  @id @default(cuid())
   postId String?
-  post   Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
-  type   MediaType
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: SetNull)
+  type   String  // "IMAGE" or "VIDEO"
   url    String
 
   createdAt DateTime @default(now())
 
   @@map("post_media")
-}
-
-enum MediaType {
-  IMAGE
-  VIDEO
 }
 
 model Comment {
@@ -128,23 +127,17 @@ model Bookmark {
 }
 
 model Notification {
-  id          String           @id @default(cuid())
+  id          String  @id @default(cuid())
   recipientId String
-  recipient   User             @relation("Recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  recipient   User    @relation("Recipient", fields: [recipientId], references: [id], onDelete: Cascade)
   issuerId    String
-  issuer      User             @relation("Issuer", fields: [issuerId], references: [id], onDelete: Cascade)
+  issuer      User    @relation("Issuer", fields: [issuerId], references: [id], onDelete: Cascade)
   postId      String?
-  post        Post?            @relation(fields: [postId], references: [id], onDelete: Cascade)
-  type        NotificationType
-  read        Boolean          @default(false)
+  post        Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  type        String  // "LIKE", "FOLLOW", or "COMMENT"
+  read        Boolean @default(false)
 
   createdAt DateTime @default(now())
 
   @@map("notifications")
-}
-
-enum NotificationType {
-  LIKE
-  FOLLOW
-  COMMENT
 }

@@ -32,6 +32,26 @@ export default function UserButton({ className }: UserButtonProps) {
 
   const queryClient = useQueryClient();
 
+  // Show login/signup buttons for non-logged-in users
+  if (!user) {
+    return (
+      <div className={cn("flex gap-2", className)}>
+        <Link
+          href="/login"
+          className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          Log in
+        </Link>
+        <Link
+          href="/signup"
+          className="rounded-lg border border-border px-4 py-2 hover:bg-accent transition-colors"
+        >
+          Sign up
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
