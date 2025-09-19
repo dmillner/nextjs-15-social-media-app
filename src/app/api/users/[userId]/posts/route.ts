@@ -14,13 +14,13 @@ export async function GET(
 
     const { user } = await validateRequest();
 
-    if (!user) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Allow public access for reading posts
+    // Use logged in user ID for personalized data if available, empty string if not
+    const loggedInUserId = user?.id || "";
 
     const posts = await prisma.post.findMany({
       where: { userId },
-      include: getPostDataInclude(user.id),
+      include: getPostDataInclude(loggedInUserId),
       orderBy: { createdAt: "desc" },
       take: pageSize + 1,
       cursor: cursor ? { id: cursor } : undefined,

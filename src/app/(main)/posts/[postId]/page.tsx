@@ -34,9 +34,8 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { user } = await validateRequest();
 
-  if (!user) return {};
-
-  const post = await getPost(postId, user.id);
+  // Allow metadata generation even for non-logged in users
+  const post = await getPost(postId, user?.id || "");
 
   return {
     title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
@@ -46,15 +45,8 @@ export async function generateMetadata({
 export default async function Page({ params: { postId } }: PageProps) {
   const { user } = await validateRequest();
 
-  if (!user) {
-    return (
-      <p className="text-destructive">
-        You&apos;re not authorized to view this page.
-      </p>
-    );
-  }
-
-  const post = await getPost(postId, user.id);
+  // Allow public viewing of posts
+  const post = await getPost(postId, user?.id || "");
 
   return (
     <main className="flex w-full min-w-0 gap-5">
